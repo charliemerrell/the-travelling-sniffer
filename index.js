@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 backgroundColor: 'rgba(75,192,192,0.6)',
                 showLine: false,  // Points only
                 pointBackgroundColor: function(context) {
-                    return context.dataIndex === 0 ? 'red' : 'rgba(75,192,192,0.6)';
+                    return context.dataIndex === 0 ? 'purple' : 'rgba(75,192,192,0.6)';
                 },
                 pointRadius: function(context) {
                     return context.dataIndex === 0 ? 10 : 5;
