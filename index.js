@@ -72,12 +72,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 borderColor: 'rgba(75,192,192,1)',
                 backgroundColor: 'rgba(75,192,192,0.6)',
                 showLine: false,  // Points only
-                pointBackgroundColor: function(context) {
-                    return context.dataIndex === 0 ? 'purple' : 'rgba(75,192,192,0.6)';
-                },
-                pointRadius: function(context) {
-                    return context.dataIndex === 0 ? 10 : 5;
-                }
+                pointBackgroundColor: 'rgba(75,192,192,0.6)', // Uniform color for all points
+                pointRadius: 5 // Uniform radius for all points
             },
             {
                 type: 'line', // Explicitly set as line for incremental drawing
@@ -124,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const myChart = new Chart(ctx, config);
 
-    let selectedPoints = [randomPoints[0]]; // Auto-select the start point
+    // Remove auto-select the start point
+    let selectedPoints = [];
 
     ctx.canvas.addEventListener('click', function(event) {
         const rect = ctx.canvas.getBoundingClientRect();
@@ -149,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function addPointToLine(point) {
-        const lastPoint = selectedPoints[selectedPoints.length - 2];
+        const lastPoint = selectedPoints[selectedPoints.length - 2] || point; // Handle first point case
         const segmentDuration = 1000; // duration per segment in ms
         let startTime = null;
 
@@ -205,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Initial update to show the auto-selected start point
-    myChart.data.datasets[1].data = selectedPoints;
-    myChart.update();
+    // Remove initial update to show the auto-selected start point
+    // myChart.data.datasets[1].data = selectedPoints;
+    // myChart.update();
 });
