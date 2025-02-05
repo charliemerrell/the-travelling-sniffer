@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 borderColor: 'rgba(75,192,192,1)',
                 borderWidth: 2,
                 fill: false,
-                pointRadius: 0
+                pointRadius: 0,
+                tension: 0 // Ensure straight lines, preventing curves that rise up
             }
         ]
     };
@@ -53,10 +54,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const myChart = new Chart(ctx, config);
 
-    // New animateLine function using requestAnimationFrame to draw each segment smoothly
+    // Updated animateLine function: add delay between segments to avoid overlap
     function animateLine(points) {
         const segmentDuration = 1000; // duration per segment in ms
-        // Start with the first point drawn
         myChart.data.datasets[1].data = [points[0]];
         myChart.update();
         function animateSegment(segmentIndex) {
@@ -79,7 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (progress < 1) {
                     requestAnimationFrame(step);
                 } else {
-                    animateSegment(segmentIndex + 1);
+                    // Wait briefly before starting next segment to prevent overlap
+                    setTimeout(() => {
+                        animateSegment(segmentIndex + 1);
+                    }, 600);
                 }
             }
             requestAnimationFrame(step);
