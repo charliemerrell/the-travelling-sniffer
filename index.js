@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function alternateRoutes(userRoute, bestRoute) {
-        let showingUserRoute = true;
+        let showingUserRoute = false; // Start with the best route
         const intervalDuration = 2000; // duration to show each route in ms
 
         function switchRoute() {
