@@ -69,6 +69,8 @@ function generateRandomPoints(count) {
 // Initialize animated chart once the DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('myChart').getContext('2d');
+    ctx.canvas.style.cursor = 'pointer'; // Set cursor to pointer for the canvas
+
     const data = {
         datasets: [
             {
@@ -239,8 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function showModal(message, userRoute, shortestRoute) {
         modal.innerHTML = `
             <p>${message}</p>
-            <p><strong>Your Route:</strong> ${prettyPrintPoints(userRoute)}</p>
-            <p><strong>Shortest Route:</strong> ${prettyPrintPoints(shortestRoute)}</p>
         `;
         modal.style.display = 'block';
         button.style.display = 'block'; // Show the button
