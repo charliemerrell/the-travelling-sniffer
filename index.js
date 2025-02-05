@@ -211,6 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const lineData = route.slice(0, currentIndex + 1);
             lineData.push(currentPoint);
             myChart.data.datasets[1].data = lineData;
+            myChart.data.datasets[1].borderColor = 'green'; // Set the color to green
             myChart.update();
 
             if (progress < 1) {
@@ -222,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     requestAnimationFrame(step);
                 } else {
                     myChart.data.datasets[1].data = route;
+                    myChart.data.datasets[1].borderColor = 'green'; // Ensure the final route is green
                     myChart.update();
                 }
             }
