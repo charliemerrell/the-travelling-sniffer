@@ -1,8 +1,9 @@
-const pointsCount = 5;
-const randomPoints = Array.from({ length: pointsCount }, () => ({
-    x: Math.floor(Math.random() * 99) + 1, // Updated to generate numbers between 1 and 99
-    y: Math.floor(Math.random() * 99) + 1  // Updated to generate numbers between 1 and 99
-}));
+let pointsCount = 5;
+let randomPoints = generateRandomPoints(pointsCount);
+let heldKarpRoute = HeldKarpShortestRoute(randomPoints);
+
+console.log("HeldKarpShortestRoute route:", prettyPrintPoints(heldKarpRoute));
+console.log("Total distance for HeldKarpShortestRoute:", calculateTotalDistance(heldKarpRoute));
 
 function HeldKarpShortestRoute(points) {
     const n = points.length;
@@ -58,9 +59,12 @@ function prettyPrintPoints(points) {
     return points.map(point => `(${point.x}, ${point.y})`).join(' -> ');
 }
 
-const heldKarpRoute = HeldKarpShortestRoute(randomPoints);
-console.log("HeldKarpShortestRoute route:", prettyPrintPoints(heldKarpRoute));
-console.log("Total distance for HeldKarpShortestRoute:", calculateTotalDistance(heldKarpRoute));
+function generateRandomPoints(count) {
+    return Array.from({ length: count }, () => ({
+        x: Math.floor(Math.random() * 99) + 1,
+        y: Math.floor(Math.random() * 99) + 1
+    }));
+}
 
 // Initialize animated chart once the DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -183,6 +187,34 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.style.display = 'none';
     document.body.appendChild(modal);
 
+    // Create button element
+    const button = document.createElement('button');
+    button.textContent = 'Generate New Points';
+    button.style.position = 'fixed';
+    button.style.bottom = '10px';
+    button.style.right = '10px';
+    button.style.padding = '10px 20px';
+    button.style.backgroundColor = '#4CAF50';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '5px';
+    button.style.cursor = 'pointer';
+    button.style.display = 'none';
+    document.body.appendChild(button);
+
+    button.addEventListener('click', function () {
+        stopAnimations(); // Stop any ongoing animations immediately
+        pointsCount += 1; // Increase the number of points by 1
+        randomPoints = generateRandomPoints(pointsCount);
+        heldKarpRoute = HeldKarpShortestRoute(randomPoints);
+        selectedPoints = [];
+        myChart.data.datasets[0].data = randomPoints;
+        myChart.data.datasets[1].data = [];
+        myChart.update();
+        modal.style.display = 'none'; // Hide the modal
+        button.style.display = 'none'; // Hide the button
+    });
+
     function showModal(message, userRoute, shortestRoute) {
         modal.innerHTML = `
             <p>${message}</p>
@@ -190,12 +222,131 @@ document.addEventListener('DOMContentLoaded', function () {
             <p><strong>Shortest Route:</strong> ${prettyPrintPoints(shortestRoute)}</p>
         `;
         modal.style.display = 'block';
+        button.style.display = 'block'; // Show the button
+        alternateRoutes(userRoute, shortestRoute); // Start alternating animations
+    }
+
+    let animationFrameId;
+    let intervalId;
+
+    function stopAnimations() {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+    }
+
+    function alternateRoutes(userRoute, bestRoute) {
+        let showingUserRoute = false; // Start with the best route
+        const intervalDuration = 2000; // duration to show each route in ms
+
+        function switchRoute() {
+            if (showingUserRoute) {
+                animateUserPath(userRoute, () => {
+                    setTimeout(switchRoute, intervalDuration); // Switch back after animation
+                });
+            } else {
+                animateBestPath(bestRoute, () => {
+                    setTimeout(switchRoute, intervalDuration); // Switch back after animation
+                });
+            }
+            showingUserRoute = !showingUserRoute;
+        }
+
+        intervalId = setInterval(switchRoute, intervalDuration);
+
+        // Clear interval when new points are generated
+        setTimeout(() => clearInterval(intervalId), 3000);
+    }
+
+    function animateUserPath(route, callback) {
+        const segmentDuration = 1000; // duration per segment in ms
+        let startTime = null;
+        let currentIndex = 0;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / segmentDuration;
+            if (progress > 1) progress = 1;
+
+            const currentPoint = {
+                x: route[currentIndex].x + (route[currentIndex + 1].x - route[currentIndex].x) * progress,
+                y: route[currentIndex].y + (route[currentIndex + 1].y - route[currentIndex].y) * progress
+            };
+
+            const lineData = route.slice(0, currentIndex + 1);
+            lineData.push(currentPoint);
+            myChart.data.datasets[1].data = lineData;
+            myChart.data.datasets[1].borderColor = 'blue'; // Set the color to blue
+            myChart.update();
+
+            if (progress < 1) {
+                animationFrameId = requestAnimationFrame(step);
+            } else {
+                currentIndex++;
+                if (currentIndex < route.length - 1) {
+                    startTime = null;
+                    animationFrameId = requestAnimationFrame(step);
+                } else {
+                    myChart.data.datasets[1].data = route;
+                    myChart.data.datasets[1].borderColor = 'blue'; // Ensure the final route is blue
+                    myChart.update();
+                    if (callback) callback(); // Call the callback after animation
+                }
+            }
+        }
+        animationFrameId = requestAnimationFrame(step);
+    }
+
+    function animateBestPath(route, callback) {
+        const segmentDuration = 1000; // duration per segment in ms
+        let startTime = null;
+        let currentIndex = 0;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / segmentDuration;
+            if (progress > 1) progress = 1;
+
+            const currentPoint = {
+                x: route[currentIndex].x + (route[currentIndex + 1].x - route[currentIndex].x) * progress,
+                y: route[currentIndex].y + (route[currentIndex + 1].y - route[currentIndex].y) * progress
+            };
+
+            const lineData = route.slice(0, currentIndex + 1);
+            lineData.push(currentPoint);
+            myChart.data.datasets[1].data = lineData;
+            myChart.data.datasets[1].borderColor = 'green'; // Set the color to green
+            myChart.update();
+
+            if (progress < 1) {
+                animationFrameId = requestAnimationFrame(step);
+            } else {
+                currentIndex++;
+                if (currentIndex < route.length - 1) {
+                    startTime = null;
+                    animationFrameId = requestAnimationFrame(step);
+                } else {
+                    myChart.data.datasets[1].data = route;
+                    myChart.data.datasets[1].borderColor = 'green'; // Ensure the final route is green
+                    myChart.update();
+                    if (callback) callback(); // Call the callback after animation
+                }
+            }
+        }
+        animationFrameId = requestAnimationFrame(step);
     }
 
     function checkShortestRoute() {
         const userDistance = calculateTotalDistance(selectedPoints);
         const shortestDistance = calculateTotalDistance(heldKarpRoute);
-        if (userDistance === shortestDistance) {
+        const tolerance = 0.01; // Tolerance for floating-point comparison
+
+        if (Math.abs(userDistance - shortestDistance) < tolerance) {
             showModal("Congratulations! You found the shortest route.", selectedPoints, heldKarpRoute);
         } else {
             showModal(`The shortest route is ${shortestDistance.toFixed(2)} units. Your route is ${userDistance.toFixed(2)} units.`, selectedPoints, heldKarpRoute);
