@@ -4,47 +4,6 @@ const randomPoints = Array.from({ length: pointsCount }, () => ({
     y: Math.floor(Math.random() * 99) + 1  // Updated to generate numbers between 1 and 99
 }));
 
-
-// Given an array of points, finds the shortest route that visits all points.
-// Starting point is fixed.
-// Return the ordered points as an array.
-function getShortestRoute1(points) {
-    if (points.length <= 1) return points.slice();
-    let shortestRoute = [];
-    let shortestDistance = Infinity;
-    for (let i = 0; i < points.length; i++) {
-        const remainingPoints = points.slice();
-        const [startPoint] = remainingPoints.splice(i, 1);
-        const route = [startPoint];
-        let totalDistance = 0;
-        let currentPoint = startPoint;
-        while (remainingPoints.length > 0) {
-            let nearestPoint;
-            let nearestDistance = Infinity;
-            let nearestIndex;
-            for (let j = 0; j < remainingPoints.length; j++) {
-                const { x: x1, y: y1 } = currentPoint;
-                const { x: x2, y: y2 } = remainingPoints[j];
-                const distance = Math.hypot(x2 - x1, y2 - y1);
-                if (distance < nearestDistance) {
-                    nearestPoint = remainingPoints[j];
-                    nearestDistance = distance;
-                    nearestIndex = j;
-                }
-            }
-            route.push(nearestPoint);
-            totalDistance += nearestDistance;
-            currentPoint = nearestPoint;
-            remainingPoints.splice(nearestIndex, 1);
-        }
-        if (totalDistance < shortestDistance) {
-            shortestRoute = route;
-            shortestDistance = totalDistance;
-        }
-    }
-    return shortestRoute;
-}
-
 function HeldKarpShortestRoute(points) {
     const n = points.length;
     const dp = Array(1 << n).fill(null).map(() => Array(n).fill(null));
@@ -99,13 +58,6 @@ function prettyPrintPoints(points) {
     return points.map(point => `(${point.x}, ${point.y})`).join(' -> ');
 }
 
-console.log("Default route:", prettyPrintPoints(randomPoints));
-console.log("Total distance for default route:", calculateTotalDistance(randomPoints));
-
-const shortestRoute1 = getShortestRoute1(randomPoints);
-console.log("getShortestRoute1 route:", prettyPrintPoints(shortestRoute1));
-console.log("Total distance for getShortestRoute1:", calculateTotalDistance(shortestRoute1));
-
 const heldKarpRoute = HeldKarpShortestRoute(randomPoints);
 console.log("HeldKarpShortestRoute route:", prettyPrintPoints(heldKarpRoute));
 console.log("Total distance for HeldKarpShortestRoute:", calculateTotalDistance(heldKarpRoute));
@@ -119,7 +71,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: HeldKarpShortestRoute(randomPoints),
                 borderColor: 'rgba(75,192,192,1)',
                 backgroundColor: 'rgba(75,192,192,0.6)',
-                showLine: false  // Points only
+                showLine: false,  // Points only
+                pointBackgroundColor: function(context) {
+                    return context.dataIndex === 0 ? 'red' : 'rgba(75,192,192,0.6)';
+                },
+                pointRadius: function(context) {
+                    return context.dataIndex === 0 ? 10 : 5;
+                }
             },
             {
                 type: 'line', // Explicitly set as line for incremental drawing
