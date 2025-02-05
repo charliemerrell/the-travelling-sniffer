@@ -190,10 +190,69 @@ document.addEventListener('DOMContentLoaded', function () {
             <p><strong>Shortest Route:</strong> ${prettyPrintPoints(shortestRoute)}</p>
         `;
         modal.style.display = 'block';
-        animateBestPath(shortestRoute); // Animate the best path
+        alternateRoutes(userRoute, shortestRoute); // Alternate between user and best path
     }
 
-    function animateBestPath(route) {
+    function alternateRoutes(userRoute, bestRoute) {
+        let showingUserRoute = true;
+        const intervalDuration = 2000; // duration to show each route in ms
+
+        function switchRoute() {
+            if (showingUserRoute) {
+                animateUserPath(userRoute, () => {
+                    setTimeout(switchRoute, intervalDuration); // Switch back after animation
+                });
+            } else {
+                animateBestPath(bestRoute, () => {
+                    setTimeout(switchRoute, intervalDuration); // Switch back after animation
+                });
+            }
+            showingUserRoute = !showingUserRoute;
+        }
+
+        switchRoute(); // Show the initial route
+    }
+
+    function animateUserPath(route, callback) {
+        const segmentDuration = 1000; // duration per segment in ms
+        let startTime = null;
+        let currentIndex = 0;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / segmentDuration;
+            if (progress > 1) progress = 1;
+
+            const currentPoint = {
+                x: route[currentIndex].x + (route[currentIndex + 1].x - route[currentIndex].x) * progress,
+                y: route[currentIndex].y + (route[currentIndex + 1].y - route[currentIndex].y) * progress
+            };
+
+            const lineData = route.slice(0, currentIndex + 1);
+            lineData.push(currentPoint);
+            myChart.data.datasets[1].data = lineData;
+            myChart.data.datasets[1].borderColor = 'rgba(75,192,192,1)'; // Set the color to original
+            myChart.update();
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                currentIndex++;
+                if (currentIndex < route.length - 1) {
+                    startTime = null;
+                    requestAnimationFrame(step);
+                } else {
+                    myChart.data.datasets[1].data = route;
+                    myChart.data.datasets[1].borderColor = 'rgba(75,192,192,1)'; // Ensure the final route is original color
+                    myChart.update();
+                    if (callback) callback(); // Call the callback after animation
+                }
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    function animateBestPath(route, callback) {
         const segmentDuration = 1000; // duration per segment in ms
         let startTime = null;
         let currentIndex = 0;
@@ -225,6 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     myChart.data.datasets[1].data = route;
                     myChart.data.datasets[1].borderColor = 'green'; // Ensure the final route is green
                     myChart.update();
+                    if (callback) callback(); // Call the callback after animation
                 }
             }
         }
