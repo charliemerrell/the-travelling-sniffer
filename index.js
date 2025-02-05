@@ -1,7 +1,7 @@
 // Initialize animated chart once the DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('myChart').getContext('2d');
-    const pointsCount = 10;
+    const pointsCount = 8;
     const randomPoints = Array.from({ length: pointsCount }, () => ({
         x: Math.floor(Math.random() * 99) + 1, // Updated to generate numbers between 1 and 99
         y: Math.floor(Math.random() * 99) + 1  // Updated to generate numbers between 1 and 99
