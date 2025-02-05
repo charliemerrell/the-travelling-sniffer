@@ -1,4 +1,4 @@
-let pointsCount = 5;
+let pointsCount = 3;
 let randomPoints = generateRandomPoints(pointsCount);
 let heldKarpRoute = HeldKarpShortestRoute(randomPoints);
 
@@ -77,13 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 backgroundColor: 'rgba(75,192,192,0.6)',
                 showLine: false,  // Points only
                 pointBackgroundColor: 'rgba(75,192,192,0.6)', // Uniform color for all points
-                pointRadius: 5 // Uniform radius for all points
+                pointRadius: 10 // Increased radius for all points
             },
             {
                 type: 'line', // Explicitly set as line for incremental drawing
                 data: [], // Initially empty
                 borderColor: 'rgba(75,192,192,1)',
-                borderWidth: 2,
+                borderWidth: 4, // Increased line thickness
                 fill: false,
                 pointRadius: 0,
                 tension: 0, // Ensure straight lines, preventing curves that rise up
@@ -213,6 +213,27 @@ document.addEventListener('DOMContentLoaded', function () {
         myChart.update();
         modal.style.display = 'none'; // Hide the modal
         button.style.display = 'none'; // Hide the button
+        button.style.backgroundColor = '#4CAF50'; // Reset button color to green
+        button.textContent = 'Generate New Points'; // Reset button text
+    });
+
+    // Create restart button element
+    const restartButton = document.createElement('button');
+    restartButton.textContent = 'Restart';
+    restartButton.style.position = 'fixed';
+    restartButton.style.bottom = '50px';
+    restartButton.style.right = '10px';
+    restartButton.style.padding = '10px 20px';
+    restartButton.style.backgroundColor = 'red';
+    restartButton.style.color = 'white';
+    restartButton.style.border = 'none';
+    restartButton.style.borderRadius = '5px';
+    restartButton.style.cursor = 'pointer';
+    restartButton.style.display = 'none';
+    document.body.appendChild(restartButton);
+
+    restartButton.addEventListener('click', function () {
+        location.reload(); // Refresh the page
     });
 
     function showModal(message, userRoute, shortestRoute) {
@@ -350,6 +371,9 @@ document.addEventListener('DOMContentLoaded', function () {
             showModal("Congratulations! You found the shortest route.", selectedPoints, heldKarpRoute);
         } else {
             showModal(`The shortest route is ${shortestDistance.toFixed(2)} units. Your route is ${userDistance.toFixed(2)} units.`, selectedPoints, heldKarpRoute);
+            button.textContent = 'Restart Game'; // Change button text to 'Restart Game'
+            button.style.display = 'none'; // Hide the green button
+            restartButton.style.display = 'block'; // Show the red restart button
         }
     }
 
