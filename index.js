@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = {
         datasets: [
             {
-                label: 'Random Points',
                 data: randomPoints,
                 borderColor: 'rgba(75,192,192,1)',
                 backgroundColor: 'rgba(75,192,192,0.6)',
@@ -17,13 +16,16 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             {
                 type: 'line', // Explicitly set as line for incremental drawing
-                label: 'Connecting Line',
                 data: [], // Initially empty
                 borderColor: 'rgba(75,192,192,1)',
                 borderWidth: 2,
                 fill: false,
                 pointRadius: 0,
-                tension: 0 // Ensure straight lines, preventing curves that rise up
+                tension: 0, // Ensure straight lines, preventing curves that rise up
+                // Disable built-in animations to prevent y resetting to 0
+                animations: {
+                    numbers: { duration: 0 }
+                }
             }
         ]
     };
