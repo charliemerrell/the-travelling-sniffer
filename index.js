@@ -53,21 +53,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const myChart = new Chart(ctx, config);
 
-    // Function to animate drawing of the connecting line incrementally
+    // New animateLine function using requestAnimationFrame to draw each segment smoothly
     function animateLine(points) {
-        myChart.data.datasets[1].data = [];
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i >= points.length) {
-                clearInterval(interval);
-                return;
+        const segmentDuration = 1000; // duration per segment in ms
+        // Start with the first point drawn
+        myChart.data.datasets[1].data = [points[0]];
+        myChart.update();
+        function animateSegment(segmentIndex) {
+            if (segmentIndex >= points.length - 1) return;
+            const start = points[segmentIndex];
+            const end = points[segmentIndex + 1];
+            let startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                let progress = (timestamp - startTime) / segmentDuration;
+                if (progress > 1) progress = 1;
+                const currentPoint = {
+                    x: start.x + (end.x - start.x) * progress,
+                    y: start.y + (end.y - start.y) * progress
+                };
+                const lineData = points.slice(0, segmentIndex + 1);
+                lineData.push(currentPoint);
+                myChart.data.datasets[1].data = lineData;
+                myChart.update();
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    animateSegment(segmentIndex + 1);
+                }
             }
-            myChart.data.datasets[1].data.push(points[i]);
-            myChart.update();
-            i++;
-        }, 600); // Increased delay for slower drawing
+            requestAnimationFrame(step);
+        }
+        animateSegment(0);
     }
 
-    // Animate line drawing once using the dots generated on page refresh
+    // Animate line drawing once using the dots generated on page refresh with the new animation
     animateLine(randomPoints);
 });
