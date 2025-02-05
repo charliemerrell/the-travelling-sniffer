@@ -175,13 +175,33 @@ document.addEventListener('DOMContentLoaded', function () {
         requestAnimationFrame(step);
     }
 
+    // Create modal element
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '10px';
+    modal.style.left = '10px';
+    modal.style.padding = '10px';
+    modal.style.backgroundColor = 'white';
+    modal.style.border = '1px solid black';
+    modal.style.display = 'none';
+    document.body.appendChild(modal);
+
+    function showModal(message, userRoute, shortestRoute) {
+        modal.innerHTML = `
+            <p>${message}</p>
+            <p><strong>Your Route:</strong> ${prettyPrintPoints(userRoute)}</p>
+            <p><strong>Shortest Route:</strong> ${prettyPrintPoints(shortestRoute)}</p>
+        `;
+        modal.style.display = 'block';
+    }
+
     function checkShortestRoute() {
         const userDistance = calculateTotalDistance(selectedPoints);
         const shortestDistance = calculateTotalDistance(heldKarpRoute);
         if (userDistance === shortestDistance) {
-            alert("Congratulations! You found the shortest route.");
+            showModal("Congratulations! You found the shortest route.", selectedPoints, heldKarpRoute);
         } else {
-            alert(`The shortest route is ${shortestDistance.toFixed(2)} units. Your route is ${userDistance.toFixed(2)} units.`);
+            showModal(`The shortest route is ${shortestDistance.toFixed(2)} units. Your route is ${userDistance.toFixed(2)} units.`, selectedPoints, heldKarpRoute);
         }
     }
 
