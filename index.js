@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = {
         datasets: [
             {
-                data: HeldKarpShortestRoute(randomPoints),
+                data: randomPoints,
                 borderColor: 'rgba(75,192,192,1)',
                 backgroundColor: 'rgba(75,192,192,0.6)',
                 showLine: false,  // Points only
@@ -124,43 +124,68 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const myChart = new Chart(ctx, config);
 
-    // Updated animateLine function: add delay between segments to avoid overlap
-    function animateLine(points) {
-        const segmentDuration = 1000; // duration per segment in ms
-        myChart.data.datasets[1].data = [points[0]];
-        myChart.update();
-        function animateSegment(segmentIndex) {
-            if (segmentIndex >= points.length - 1) return;
-            const start = points[segmentIndex];
-            const end = points[segmentIndex + 1];
-            let startTime = null;
-            function step(timestamp) {
-                if (!startTime) startTime = timestamp;
-                let progress = (timestamp - startTime) / segmentDuration;
-                if (progress > 1) progress = 1;
-                const currentPoint = {
-                    x: start.x + (end.x - start.x) * progress,
-                    y: start.y + (end.y - start.y) * progress
-                };
-                const lineData = points.slice(0, segmentIndex + 1);
-                lineData.push(currentPoint);
-                myChart.data.datasets[1].data = lineData;
-                myChart.update();
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    // Wait briefly before starting next segment to prevent overlap
-                    setTimeout(() => {
-                        animateSegment(segmentIndex + 1);
-                    }, 600);
-                }
+    let selectedPoints = [randomPoints[0]]; // Auto-select the start point
+
+    ctx.canvas.addEventListener('click', function(event) {
+        const rect = ctx.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const chartX = myChart.scales.x.getValueForPixel(x);
+        const chartY = myChart.scales.y.getValueForPixel(y);
+
+        const closestPoint = randomPoints.reduce((prev, curr) => {
+            const prevDistance = Math.hypot(prev.x - chartX, prev.y - chartY);
+            const currDistance = Math.hypot(curr.x - chartX, curr.y - chartY);
+            return (prevDistance < currDistance) ? prev : curr;
+        });
+
+        if (!selectedPoints.includes(closestPoint)) {
+            selectedPoints.push(closestPoint);
+            addPointToLine(closestPoint);
+            if (selectedPoints.length === randomPoints.length) {
+                checkShortestRoute();
             }
-            requestAnimationFrame(step);
         }
-        animateSegment(0);
+    });
+
+    function addPointToLine(point) {
+        const lastPoint = selectedPoints[selectedPoints.length - 2];
+        const segmentDuration = 1000; // duration per segment in ms
+        let startTime = null;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / segmentDuration;
+            if (progress > 1) progress = 1;
+            const currentPoint = {
+                x: lastPoint.x + (point.x - lastPoint.x) * progress,
+                y: lastPoint.y + (point.y - lastPoint.y) * progress
+            };
+            const lineData = selectedPoints.slice(0, selectedPoints.length - 1);
+            lineData.push(currentPoint);
+            myChart.data.datasets[1].data = lineData;
+            myChart.update();
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                myChart.data.datasets[1].data = selectedPoints;
+                myChart.update();
+            }
+        }
+        requestAnimationFrame(step);
     }
 
-    // Animate line drawing once using the shortest route generated on page refresh with the new animation
-    const heldKarpRoute = HeldKarpShortestRoute(randomPoints);
-    animateLine(heldKarpRoute);
+    function checkShortestRoute() {
+        const userDistance = calculateTotalDistance(selectedPoints);
+        const shortestDistance = calculateTotalDistance(heldKarpRoute);
+        if (userDistance === shortestDistance) {
+            alert("Congratulations! You found the shortest route.");
+        } else {
+            alert(`The shortest route is ${shortestDistance.toFixed(2)} units. Your route is ${userDistance.toFixed(2)} units.`);
+        }
+    }
+
+    // Initial update to show the auto-selected start point
+    myChart.data.datasets[1].data = selectedPoints;
+    myChart.update();
 });
