@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <p><strong>Shortest Route:</strong> ${prettyPrintPoints(shortestRoute)}</p>
         `;
         modal.style.display = 'block';
-        alternateRoutes(userRoute, shortestRoute); // Alternate between user and best path
+        alternateRoutes(userRoute, shortestRoute); // Start alternating animations
     }
 
     function alternateRoutes(userRoute, bestRoute) {
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const lineData = route.slice(0, currentIndex + 1);
             lineData.push(currentPoint);
             myChart.data.datasets[1].data = lineData;
-            myChart.data.datasets[1].borderColor = 'rgba(75,192,192,1)'; // Set the color to original
+            myChart.data.datasets[1].borderColor = 'blue'; // Set the color to blue
             myChart.update();
 
             if (progress < 1) {
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     requestAnimationFrame(step);
                 } else {
                     myChart.data.datasets[1].data = route;
-                    myChart.data.datasets[1].borderColor = 'rgba(75,192,192,1)'; // Ensure the final route is original color
+                    myChart.data.datasets[1].borderColor = 'blue'; // Ensure the final route is blue
                     myChart.update();
                     if (callback) callback(); // Call the callback after animation
                 }
