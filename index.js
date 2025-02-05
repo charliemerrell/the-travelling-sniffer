@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('myChart').getContext('2d');
     const pointsCount = 5;
     const randomPoints = Array.from({ length: pointsCount }, () => ({
-        x: Math.floor(Math.random() * 101),
-        y: Math.floor(Math.random() * 101)
+        x: Math.floor(Math.random() * 99) + 1, // Updated to generate numbers between 1 and 99
+        y: Math.floor(Math.random() * 99) + 1  // Updated to generate numbers between 1 and 99
     }));
     const data = {
         datasets: [
