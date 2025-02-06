@@ -204,6 +204,18 @@ document.addEventListener('DOMContentLoaded', function () {
     button.style.display = 'none';
     document.body.appendChild(button);
 
+    // Create node count display element
+    const nodeCountDisplay = document.createElement('div');
+    nodeCountDisplay.style.position = 'fixed';
+    nodeCountDisplay.style.top = '10px';
+    nodeCountDisplay.style.right = '10px';
+    nodeCountDisplay.style.padding = '10px';
+    nodeCountDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    nodeCountDisplay.style.color = 'white';
+    nodeCountDisplay.style.borderRadius = '5px';
+    nodeCountDisplay.textContent = `Nodes: ${pointsCount}`;
+    document.body.appendChild(nodeCountDisplay);
+
     button.addEventListener('click', function () {
         stopAnimations(); // Stop any ongoing animations immediately
         pointsCount += 1; // Increase the number of points by 1
@@ -217,6 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
         button.style.display = 'none'; // Hide the button
         button.style.backgroundColor = '#4CAF50'; // Reset button color to green
         button.textContent = 'Generate New Points'; // Reset button text
+        nodeCountDisplay.textContent = `Nodes: ${pointsCount}`;
     });
 
     // Create restart button element
